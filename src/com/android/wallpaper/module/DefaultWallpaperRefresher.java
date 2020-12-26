@@ -21,9 +21,11 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.Display;
 
 import com.android.wallpaper.R;
 import com.android.wallpaper.asset.BitmapUtils;
@@ -38,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
 /**
  * Default implementation of {@link WallpaperRefresher} which refreshes wallpaper metadata
  * asynchronously.
@@ -50,6 +54,8 @@ public class DefaultWallpaperRefresher implements WallpaperRefresher {
     private final WallpaperPreferences mWallpaperPreferences;
     private final WallpaperManager mWallpaperManager;
 
+    private final Context mWindowContext;
+
     /**
      * @param context The application's context.
      */
@@ -61,7 +67,12 @@ public class DefaultWallpaperRefresher implements WallpaperRefresher {
 
         // Retrieve WallpaperManager using Context#getSystemService instead of
         // WallpaperManager#getInstance so it can be mocked out in test.
-        mWallpaperManager = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+        final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        mWindowContext = context.createDisplayContext(display)
+         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
+
+        mWallpaperManager = (WallpaperManager) mWindowContext.getSystemService(Context.WALLPAPER_SERVICE);
     }
 
     @Override

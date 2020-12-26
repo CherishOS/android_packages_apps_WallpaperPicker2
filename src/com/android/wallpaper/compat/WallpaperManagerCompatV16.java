@@ -21,10 +21,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.hardware.display.DisplayManager;
 import android.os.ParcelFileDescriptor;
+import android.view.Display;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
 /**
  * The pre-N implementation of {@link WallpaperManagerCompat} which implements its methods by
@@ -33,11 +37,18 @@ import java.io.InputStream;
 public class WallpaperManagerCompatV16 extends WallpaperManagerCompat {
     protected WallpaperManager mWallpaperManager;
 
+    private Context mWindowContext;
+
     @SuppressLint("ServiceCast")
     public WallpaperManagerCompatV16(Context context) {
         // Retrieve WallpaperManager using Context#getSystemService instead of
         // WallpaperManager#getInstance so it can be mocked out in test.
-        mWallpaperManager = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+
+        final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        mWindowContext = context.createDisplayContext(display)
+         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
+        mWallpaperManager = (WallpaperManager) mWindowContext.getSystemService(Context.WALLPAPER_SERVICE);
     }
 
     @Override

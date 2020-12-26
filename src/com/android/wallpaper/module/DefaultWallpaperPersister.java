@@ -27,6 +27,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
@@ -56,6 +57,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
 /**
  * Concrete implementation of WallpaperPersister which actually sets wallpapers to the system via
  * the WallpaperManager.
@@ -66,6 +69,7 @@ public class DefaultWallpaperPersister implements WallpaperPersister {
     private static final String TAG = "WallpaperPersister";
 
     private final Context mAppContext; // The application's context.
+    private final Context mWindowContext;
     // Context that accesses files in device protected storage
     private final WallpaperManager mWallpaperManager;
     private final WallpaperManagerCompat mWallpaperManagerCompat;
@@ -77,10 +81,14 @@ public class DefaultWallpaperPersister implements WallpaperPersister {
     @SuppressLint("ServiceCast")
     public DefaultWallpaperPersister(Context context) {
         mAppContext = context.getApplicationContext();
+        final DisplayManager displayManager = context.getSystemService(DisplayManager.class);
+        final Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+        mWindowContext = context.createDisplayContext(display)
+         .createWindowContext(TYPE_APPLICATION_OVERLAY, null);
         // Retrieve WallpaperManager using Context#getSystemService instead of
         // WallpaperManager#getInstance so it can be mocked out in test.
         Injector injector = InjectorProvider.getInjector();
-        mWallpaperManager = (WallpaperManager) context.getSystemService(Context.WALLPAPER_SERVICE);
+        mWallpaperManager = (WallpaperManager) mWindowContext.getSystemService(mAppContext.WALLPAPER_SERVICE);
         mWallpaperManagerCompat = injector.getWallpaperManagerCompat(context);
         mWallpaperPreferences = injector.getPreferences(context);
         mWallpaperChangedNotifier = WallpaperChangedNotifier.getInstance();
