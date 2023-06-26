@@ -15,14 +15,12 @@
      limitations under the License.
 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/scroll_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/transparent"
-    android:overScrollMode="never"
-    android:scrollbars="vertical"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    android:overScrollMode="always"
+    android:scrollbars="vertical">
     <LinearLayout
         android:id="@+id/section_container"
         android:layout_width="match_parent"
